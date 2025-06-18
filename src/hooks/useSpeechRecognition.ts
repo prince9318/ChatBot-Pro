@@ -1,6 +1,16 @@
 import { useState, useRef, useCallback } from "react";
 import { SPEECH_RECOGNITION_CONFIG } from "../utils/constants";
 
+// Add SpeechRecognition type for TypeScript
+type SpeechRecognition = any;
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: new () => any;
+    SpeechRecognition: new () => any;
+  }
+}
+
 interface SpeechRecognitionHook {
   isListening: boolean;
   transcript: string;
@@ -37,7 +47,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       setTranscript("");
     };
 
-    recognitionRef.current.onresult = (event) => {
+    recognitionRef.current.onresult = (event: any) => {
       const current = event.resultIndex;
       const transcript = event.results[current][0].transcript;
       setTranscript(transcript);
@@ -47,7 +57,8 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       setIsListening(false);
     };
 
-    recognitionRef.current.onerror = (event) => {
+    recognitionRef.current.onerror = (event: Event) => {
+      // @ts-expect-error: SpeechRecognitionErrorEvent is not in TypeScript DOM typings
       setError(`Speech recognition error: ${event.error}`);
       setIsListening(false);
     };
